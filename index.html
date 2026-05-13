@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>무한 검 강화</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 클릭 타격감을 위한 CSS 애니메이션 */
+        .click-effect:active {
+            transform: scale(0.95);
+            transition: transform 0.05s ease-in-out;
+        }
+        
+        .floating-text {
+            animation: floatUp 0.8s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.5); }
+            20% { transform: translateY(-20px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1); }
+        }
+
+        /* --- 강화 이펙트 --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            20%, 60% { transform: translateX(-5px) translateY(3px) rotate(-1deg); }
+            40%, 80% { transform: translateX(5px) translateY(-3px) rotate(1deg); }
+        }
+        .anim-shake { animation: shake 0.3s infinite; }
+
+        @keyframes flashSuccess {
+            0% { box-shadow: inset 0 0 0 0 rgba(74, 222, 128, 0); }
+            30% { box-shadow: inset 0 0 200px 80px rgba(74, 222, 128, 0.4); }
+            100% { box-shadow: inset 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+        .effect-success { animation: flashSuccess 1s ease-out; }
+
+        @keyframes flashFail {
+            0% { box-shadow: inset 0 0 0 0 rgba(220, 38, 38, 0); }
+            30% { box-shadow: inset 0 0 200px 80px rgba(220, 38, 38, 0.6); background-color: rgba(69, 10, 10, 0.8); }
+            100% { box-shadow: inset 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+        .effect-fail { animation: flashFail 1s ease-out; }
+
+        /* --- 광석 파편 파티클 --- */
+        @keyframes shootOut {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+        .hit-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: shootOut 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
+        }
+
+        /* 칼이 살짝씩 떠다니는 애니메이션 (자랑용) */
+        @keyframes floatSword {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        .floating-sword {
+            animation: floatSword 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col items-center font-sans select-none overflow-hidden transition-colors duration-300">
+
+    <!-- 미니멀해진 상단 정보창 -->
+    <header class="w-full max-w-xl mt-6 px-8 py-4 bg-gray-800 rounded-2xl shadow-xl border border-gray-700 flex justify-between items-center z-10">
+        <div class="flex flex-col">
+            <span class="text-gray-400 text-xs font-bold tracking-wider mb-1">클릭당 획득</span>
+            <div class="text-2xl font-bold text-gray-200"><span id="click-power">1</span> <span class="text-sm text-gray-400">원</span></div>
+        </div>
+        <div class="flex flex-col items-end">
+            <span class="text-gray-400 text-xs font-bold tracking-wider mb-1">보유 금액</span>
+            <div class="text-3xl font-black text-yellow-400 drop-shadow-md">
+                <span id="gold-display">0</span> <span class="text-xl text-yellow-500">원</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인: 자랑용 거대 무기 쇼케이스 + 광석 채굴 -->
+    <main class="flex-1 flex flex-col items-center justify-center w-full relative px-4">
+        
+        <!-- [핵심] 무기 이름 및 거대 이미지 쇼케이스 영역 -->
+        <div class="w-full flex flex-col items-center justify-center mt-2 mb-10 h-80">
+            <!-- 무기 이름 (플래시게임 스타일: +레벨 무기이름) -->
+            <h1 id="sword-showcase-name" class="text-5xl font-black mb-8 tracking-widest drop-shadow-xl z-20">
+                +0 나무검
+            </h1>
+            
+            <!-- 무기 이미지 (여기에 거대한 SVG가 동적으로 들어갑니다) -->
+            <div id="sword-showcase-image" class="floating-sword flex items-center justify-center transition-all duration-500 z-10 pointer-events-none">
+                <!-- Javascript에서 SVG 삽입 -->
+            </div>
+        </div>
+
+        <!-- 광석 버튼 (무기 밑에 살짝 작게 배치) -->
+        <button id="mine-button" class="relative group outline-none click-effect mt-4">
+            <div class="absolute inset-0 bg-blue-500 rounded-full blur-[60px] opacity-20 group-hover:opacity-40 transition duration-500"></div>
+            <svg class="relative w-32 h-32 drop-shadow-2xl text-blue-400 transition-transform duration-300 group-hover:-translate-y-1" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path d="M12 2L2 9L12 22L22 9L12 2Z" fill="url(#ore-grad)"/>
+                <path d="M12 2L2 9L12 12L22 9L12 2Z" fill="rgba(255,255,255,0.4)"/>
+                <path d="M2 9L12 22L12 12L2 9Z" fill="rgba(0,0,0,0.2)"/>
+                <path d="M12 2L22 9L12 12Z" fill="rgba(255,255,255,0.1)"/>
+                <defs>
+                    <linearGradient id="ore-grad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#93C5FD"/><stop offset="100%" stop-color="#1D4ED8"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <p class="absolute -bottom-8 w-full text-center text-gray-500 font-medium tracking-wide animate-pulse pointer-events-none">광석 캐기</p>
+        </button>
+    </main>
+
+    <!-- 하단 UI: 강화 패널 -->
+    <footer class="w-full max-w-xl mb-8 p-6 bg-gray-800 rounded-2xl shadow-xl border border-gray-700 flex flex-col items-center relative z-10">
+        <button id="upgrade-button" class="w-full py-4 rounded-xl font-bold text-2xl transition-all duration-200 flex flex-col items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white shadow-lg active:scale-95 disabled:from-gray-600 disabled:to-gray-700 disabled:text-gray-400 disabled:active:scale-100 disabled:shadow-none disabled:cursor-not-allowed border-2 border-red-900 disabled:border-gray-600">
+            <span id="upgrade-text" class="tracking-widest">강화하기</span>
+            <div id="upgrade-info" class="text-base font-medium mt-1 flex space-x-6 text-red-200">
+                <span>비용: <span id="upgrade-cost" class="font-bold text-white">10</span>원</span>
+                <span>성공률: <span id="upgrade-prob" class="font-bold text-yellow-300">100</span>%</span>
+            </div>
+        </button>
+        <p id="upgrade-message" class="mt-3 text-sm font-semibold h-5 text-center"></p>
+    </footer>
+
+    <script>
+        // --- 거대하고 화려한 무기 SVG 데이터 모음 ---
+        const svgWooden = `
+            <svg viewBox="-20 -20 140 140" class="w-40 h-40 drop-shadow-md transition-all duration-300">
+                <g transform="rotate(45 50 50)">
+                    <path d="M45,20 L50,10 L55,20 L55,60 L45,60 Z" fill="#8B4513" stroke="#5C4033" stroke-width="2"/>
+                    <line x1="50" y1="10" x2="50" y2="60" stroke="#5C4033" stroke-width="1"/>
+                    <rect x="35" y="60" width="30" height="8" rx="2" fill="#654321"/>
+                    <rect x="45" y="68" width="10" height="20" fill="#3E2723"/>
+                    <circle cx="50" cy="88" r="4" fill="#654321"/>
+                </g>
+            </svg>`;
+
+        const svgBronze = `
+            <svg viewBox="-20 -20 140 140" class="w-48 h-48 drop-shadow-lg transition-all duration-300">
+                <g transform="rotate(45 50 50)">
+                    <path d="M44,20 L50,5 L56,20 L55,60 L45,60 Z" fill="#CD7F32"/>
+                    <path d="M50,5 L56,20 L55,60 L50,60 Z" fill="#D99058"/>
+                    <rect x="30" y="60" width="40" height="10" rx="3" fill="#8B4513"/>
+                    <rect x="44" y="70" width="12" height="22" fill="#5C4033"/>
+                    <polygon points="50,96 44,92 56,92" fill="#CD7F32"/>
+                </g>
+            </svg>`;
+
+        const svgSilver = `
+            <svg viewBox="-20 -20 140 140" class="w-60 h-60 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] transition-all duration-300">
+                <defs>
+                    <linearGradient id="silver-blade" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#D4D4D8"/><stop offset="50%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#A1A1AA"/>
+                    </linearGradient>
+                </defs>
+                <g transform="rotate(45 50 50)">
+                    <path d="M42,25 L50,-5 L58,25 L56,60 L44,60 Z" fill="url(#silver-blade)"/>
+                    <path d="M50,-5 L58,25 L56,60 L50,60 Z" fill="rgba(255,255,255,0.6)"/>
+                    <path d="M25,60 L75,60 L65,70 L35,70 Z" fill="#71717A"/>
+                    <rect x="44" y="70" width="12" height="24" fill="#3F3F46"/>
+                    <circle cx="50" cy="98" r="6" fill="#D4D4D8"/>
+                </g>
+            </svg>`;
+
+        const svgSteel = `
+            <svg viewBox="-20 -20 140 140" class="w-72 h-72 drop-shadow-[0_0_20px_rgba(100,116,139,0.8)] transition-all duration-300">
+                <defs>
+                    <linearGradient id="steel-blade" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#64748B"/><stop offset="50%" stop-color="#94A3B8"/><stop offset="100%" stop-color="#475569"/>
+                    </linearGradient>
+                </defs>
+                <g transform="rotate(45 50 50)">
+                    <path d="M38,20 L50,-15 L62,20 L58,60 L42,60 Z" fill="#334155"/>
+                    <path d="M44,20 L50,-15 L56,20 L54,60 L46,60 Z" fill="url(#steel-blade)"/>
+                    <path d="M15,60 L85,60 L75,75 L25,75 Z" fill="#1E293B"/>
+                    <circle cx="50" cy="67.5" r="5" fill="#DC2626"/>
+                    <rect x="44" y="75" width="12" height="28" fill="#0F172A"/>
+                    <path d="M50,110 L40,103 L60,103 Z" fill="#475569"/>
+                </g>
+            </svg>`;
+
+        const svgGold = `
+            <svg viewBox="-30 -30 160 160" class="w-80 h-80 drop-shadow-[0_0_35px_rgba(250,204,21,0.8)] transition-all duration-300">
+                <defs>
+                    <linearGradient id="gold-blade" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#FBBF24"/><stop offset="50%" stop-color="#FEF08A"/><stop offset="100%" stop-color="#D97706"/>
+                    </linearGradient>
+                    <linearGradient id="gold-guard" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#B45309"/>
+                    </linearGradient>
+                </defs>
+                <g transform="rotate(45 50 50)">
+                    <path d="M40,25 L50,-25 L60,25 L56,60 L44,60 Z" fill="url(#gold-blade)"/>
+                    <path d="M50,-25 L60,25 L56,60 L50,60 Z" fill="rgba(255,255,255,0.6)"/>
+                    <path d="M10,60 Q50,85 90,60 L80,75 Q50,90 20,75 Z" fill="url(#gold-guard)"/>
+                    <circle cx="50" cy="70" r="8" fill="#EF4444"/>
+                    <circle cx="50" cy="68" r="3" fill="#FCA5A5"/>
+                    <rect x="42" y="75" width="16" height="30" fill="#78350F"/>
+                    <polygon points="50,115 35,105 65,105" fill="url(#gold-guard)"/>
+                    <circle cx="50" cy="108" r="4" fill="#3B82F6"/>
+                </g>
+            </svg>`;
+
+        const svgDiamond = `
+            <svg viewBox="-40 -40 180 180" class="w-96 h-96 drop-shadow-[0_0_50px_rgba(34,211,238,1)] animate-pulse transition-all duration-300">
+                <defs>
+                    <linearGradient id="dia-blade" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#22D3EE"/><stop offset="50%" stop-color="#CFFAFE"/><stop offset="100%" stop-color="#0891B2"/>
+                    </linearGradient>
+                    <linearGradient id="dia-core" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#67E8F9"/>
+                    </linearGradient>
+                </defs>
+                <g transform="rotate(45 50 50)">
+                    <path d="M35,30 L50,-35 L65,30 L58,60 L42,60 Z" fill="url(#dia-blade)"/>
+                    <polygon points="35,30 25,20 40,15 50,-35" fill="rgba(34,211,238,0.5)"/>
+                    <polygon points="65,30 75,20 60,15 50,-35" fill="rgba(34,211,238,0.5)"/>
+                    <path d="M50,-35 L55,20 L52,60 L48,60 L45,20 Z" fill="url(#dia-core)"/>
+                    <path d="M0,50 L40,65 L45,75 L20,95 Z" fill="#0E7490"/>
+                    <path d="M100,50 L60,65 L55,75 L80,95 Z" fill="#0E7490"/>
+                    <polygon points="40,60 60,60 65,75 35,75" fill="#164E63"/>
+                    <polygon points="50,60 60,68 50,76 40,68" fill="#FFFFFF"/>
+                    <rect x="42" y="75" width="16" height="35" fill="#082F49"/>
+                    <polygon points="50,130 30,110 50,115 70,110" fill="#06B6D4"/>
+                    <polygon points="50,130 45,115 55,115" fill="#FFFFFF"/>
+                </g>
+            </svg>`;
+
+        // --- 게임 상태 데이터 ---
+        let gold = 0; 
+        let isUpgrading = false; 
+        
+        // --- 검 데이터베이스 ---
+        const swordDB = [
+            { name: '나무검', clickPower: 1, cost: 10, prob: 100, colorClass: 'text-amber-700', particleClass: 'text-xl text-amber-500', svg: svgWooden },
+            { name: '동검', clickPower: 5, cost: 50, prob: 80, colorClass: 'text-orange-400', particleClass: 'text-2xl text-orange-400', svg: svgBronze },
+            { name: '은검', clickPower: 20, cost: 200, prob: 60, colorClass: 'text-gray-300', particleClass: 'text-3xl text-gray-200 shadow-sm', svg: svgSilver },
+            { name: '강철검', clickPower: 100, cost: 1000, prob: 40, colorClass: 'text-slate-400', particleClass: 'text-4xl text-slate-300 drop-shadow-md', svg: svgSteel },
+            { name: '황금검', clickPower: 500, cost: 5000, prob: 20, colorClass: 'text-yellow-400', particleClass: 'text-5xl text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]', svg: svgGold },
+            { name: '다이아검', clickPower: 3000, cost: Infinity, prob: 0, colorClass: 'text-cyan-300', particleClass: 'text-7xl text-cyan-300 drop-shadow-[0_0_20px_rgba(103,232,249,0.9)] animate-pulse', svg: svgDiamond }
+        ];
+        
+        let currentSwordLevel = 0; 
+
+        // --- 사운드 시스템 ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playHitSound(level) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (level === 0) {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
+            } else {
+                osc.type = 'sine';
+                const baseFreq = 300 + (level * 150);
+                osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, audioCtx.currentTime + 0.1);
+            }
+
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        // [변경] 강화 중 사운드: 대장간 망치질 (깡! 깡!)
+        function playChargingSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const now = audioCtx.currentTime;
+            
+            // 망치로 쇠를 내리치는 소리를 합성하는 내부 함수
+            function strikeAnvil(time) {
+                // 1. 금속 타격음 (깡!)
+                const metalOsc = audioCtx.createOscillator();
+                const metalGain = audioCtx.createGain();
+                metalOsc.type = 'square';
+                metalOsc.frequency.setValueAtTime(800, time);
+                metalOsc.frequency.exponentialRampToValueAtTime(200, time + 0.3);
+
+                // 쇳소리의 날카로움을 강조하기 위한 밴드패스 필터
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.setValueAtTime(1500, time);
+                filter.frequency.linearRampToValueAtTime(800, time + 0.2);
+                filter.Q.value = 5;
+
+                metalGain.gain.setValueAtTime(0, time);
+                metalGain.gain.linearRampToValueAtTime(0.6, time + 0.02); // 아주 짧고 강한 어택
+                metalGain.gain.exponentialRampToValueAtTime(0.01, time + 0.4); // 은은한 잔향
+
+                metalOsc.connect(filter);
+                filter.connect(metalGain);
+                metalGain.connect(audioCtx.destination);
+                metalOsc.start(time);
+                metalOsc.stop(time + 0.4);
+
+                // 2. 둔탁한 망치 베이스 (쿵!)
+                const thudOsc = audioCtx.createOscillator();
+                const thudGain = audioCtx.createGain();
+                thudOsc.type = 'sine';
+                thudOsc.frequency.setValueAtTime(150, time);
+                thudOsc.frequency.exponentialRampToValueAtTime(40, time + 0.2);
+
+                thudGain.gain.setValueAtTime(0, time);
+                thudGain.gain.linearRampToValueAtTime(0.8, time + 0.02);
+                thudGain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+
+                thudOsc.connect(thudGain);
+                thudGain.connect(audioCtx.destination);
+                thudOsc.start(time);
+                thudOsc.stop(time + 0.3);
+            }
+
+            // 3초의 대기시간 동안 점진적으로 빨라지는 망치질 스케줄링 (긴장감 고조)
+            const strikeTimes = [0, 0.8, 1.5, 2.1, 2.6];
+            strikeTimes.forEach(delay => {
+                strikeAnvil(now + delay);
+            });
+        }
+
+        // [추가] 강화 성공 사운드 (경쾌한 화음)
+        function playSuccessSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 (C Major 코드)
+            frequencies.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                
+                const startTime = audioCtx.currentTime + i * 0.1; // 0.1초 간격으로 아르페지오 연주
+                gainNode.gain.setValueAtTime(0, startTime);
+                gainNode.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.8);
+                
+                osc.start(startTime);
+                osc.stop(startTime + 0.9);
+            });
+        }
+
+        // [추가] 강화 실패 사운드 (와장창 파괴음)
+        function playFailSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            // 노이즈 버퍼 생성 (화이트 노이즈)
+            const bufferSize = audioCtx.sampleRate * 0.5; // 0.5초 분량
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1; // 무작위 노이즈
+            }
+            
+            const noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = buffer;
+            
+            // 노이즈에 필터를 걸어 둔탁한 파괴음으로 변경
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(1500, audioCtx.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.5);
+
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+
+            noiseSource.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            noiseSource.start();
+        }
+
+        // --- DOM 요소 참조 ---
+        const goldDisplay = document.getElementById('gold-display');
+        const clickPowerDisplay = document.getElementById('click-power');
+        const mineButton = document.getElementById('mine-button');
+        
+        const showcaseName = document.getElementById('sword-showcase-name');
+        const showcaseImageContainer = document.getElementById('sword-showcase-image');
+
+        const upgradeButton = document.getElementById('upgrade-button');
+        const upgradeText = document.getElementById('upgrade-text');
+        const upgradeInfo = document.getElementById('upgrade-info');
+        const upgradeCostDisplay = document.getElementById('upgrade-cost');
+        const upgradeProbDisplay = document.getElementById('upgrade-prob');
+        const upgradeMessage = document.getElementById('upgrade-message');
+
+        // --- UI 업데이트 함수 ---
+        function updateUI() {
+            const currentSword = swordDB[currentSwordLevel];
+            
+            goldDisplay.textContent = gold.toLocaleString(); 
+            clickPowerDisplay.textContent = currentSword.clickPower.toLocaleString();
+            
+            // [핵심] 쇼케이스 업데이트: +레벨 텍스트 적용 및 거대 SVG 교체
+            showcaseName.textContent = `+${currentSwordLevel} ${currentSword.name}`;
+            showcaseName.className = `text-5xl font-black mb-8 tracking-widest drop-shadow-2xl z-20 ${currentSword.colorClass}`;
+            showcaseImageContainer.innerHTML = currentSword.svg;
+
+            if (isUpgrading) {
+                upgradeButton.disabled = true;
+                upgradeText.textContent = "강화 중...";
+                upgradeText.classList.add('animate-pulse', 'text-yellow-300');
+                return;
+            }
+            
+            upgradeText.classList.remove('animate-pulse', 'text-yellow-300');
+
+            if (currentSwordLevel >= swordDB.length - 1) {
+                upgradeButton.disabled = true;
+                upgradeText.textContent = "최대 레벨 도달 (강화 불가)";
+                upgradeInfo.style.display = 'none';
+            } else {
+                upgradeInfo.style.display = 'flex';
+                upgradeText.textContent = "강화하기";
+                upgradeCostDisplay.textContent = currentSword.cost.toLocaleString();
+                upgradeProbDisplay.textContent = currentSword.prob;
+                
+                if (gold < currentSword.cost) {
+                    upgradeButton.disabled = true;
+                    upgradeCostDisplay.classList.add('text-red-300');
+                } else {
+                    upgradeButton.disabled = false;
+                    upgradeCostDisplay.classList.remove('text-red-300');
+                }
+            }
+        }
+
+        // --- 이펙트 관련 함수들 ---
+        function showFloatingText(x, y, currentSword) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'absolute pointer-events-none z-50';
+            const randomXOffset = (Math.random() - 0.5) * 60; 
+            wrapper.style.left = `${x + randomXOffset - 15}px`;
+            wrapper.style.top = `${y - 30}px`;
+            const randomRotate = (Math.random() - 0.5) * 40;
+            wrapper.style.transform = `rotate(${randomRotate}deg)`;
+
+            const particle = document.createElement('div');
+            particle.textContent = `+${currentSword.clickPower.toLocaleString()}`;
+            particle.className = `font-black floating-text ${currentSword.particleClass}`;
+            
+            wrapper.appendChild(particle);
+            document.body.appendChild(wrapper);
+
+            setTimeout(() => wrapper.remove(), 800);
+        }
+
+        function createHitParticles(x, y) {
+            const particleCount = 6;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'hit-particle bg-blue-300 z-40'; 
+                const size = Math.random() * 6 + 4; 
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 60 + 30;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                particle.style.left = `${x - size/2}px`;
+                particle.style.top = `${y - size/2}px`;
+                
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 400); 
+            }
+        }
+
+        // --- 이벤트 리스너 ---
+        mineButton.addEventListener('click', (e) => {
+            if (isUpgrading) return; 
+
+            const currentSword = swordDB[currentSwordLevel];
+            gold += currentSword.clickPower;
+            updateUI();
+            
+            const clickX = e.clientX || window.innerWidth / 2;
+            const clickY = e.clientY || window.innerHeight / 2;
+            
+            showFloatingText(clickX, clickY, currentSword);
+            createHitParticles(clickX, clickY);
+            playHitSound(currentSwordLevel);
+        });
+
+        upgradeButton.addEventListener('click', () => {
+            if (isUpgrading) return; 
+
+            const currentSword = swordDB[currentSwordLevel];
+            if (gold < currentSword.cost) return;
+
+            gold -= currentSword.cost;
+            isUpgrading = true;
+            
+            updateUI();
+            showUpgradeMessage("망치질 중... 🔨", "text-yellow-400");
+            document.body.classList.add('anim-shake');
+            
+            // [적용] 3초간 기를 모으는 사운드 재생
+            playChargingSound();
+            
+            setTimeout(() => {
+                document.body.classList.remove('anim-shake');
+                const randomValue = Math.random() * 100; 
+                
+                if (randomValue < currentSword.prob) {
+                    currentSwordLevel++;
+                    showUpgradeMessage(`+${currentSwordLevel} ${swordDB[currentSwordLevel].name}(으)로 강화 성공! 🎉`, 'text-green-400');
+                    document.body.classList.add('effect-success');
+                    
+                    // [적용] 성공 사운드
+                    playSuccessSound();
+                    
+                    setTimeout(() => document.body.classList.remove('effect-success'), 1000);
+                } else {
+                    currentSwordLevel = 0;
+                    showUpgradeMessage(`강화 실패... 💥 +0 나무검으로 돌아갑니다.`, 'text-red-400');
+                    document.body.classList.add('effect-fail');
+                    
+                    // [적용] 실패(파괴) 사운드
+                    playFailSound();
+                    
+                    setTimeout(() => document.body.classList.remove('effect-fail'), 1000);
+                }
+                
+                isUpgrading = false;
+                updateUI();
+            }, 3000);
+        });
+
+        function showUpgradeMessage(msg, colorClass) {
+            upgradeMessage.textContent = msg;
+            upgradeMessage.className = `mt-3 text-sm font-bold h-5 text-center ${colorClass} animate-bounce`;
+            setTimeout(() => upgradeMessage.classList.remove('animate-bounce'), 1000);
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
