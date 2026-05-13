@@ -277,57 +277,80 @@
             osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        // [변경] 강화 중 사운드: 대장간 망치질 (깡! 깡!)
+        // [수정] 강화 중 사운드: 레이저 소리 제거, 묵직하고 진짜 같은 대장간 망치질로 변경
         function playChargingSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
             const now = audioCtx.currentTime;
             
-            // 망치로 쇠를 내리치는 소리를 합성하는 내부 함수
             function strikeAnvil(time) {
-                // 1. 금속 타격음 (깡!)
-                const metalOsc = audioCtx.createOscillator();
-                const metalGain = audioCtx.createGain();
-                metalOsc.type = 'square';
-                metalOsc.frequency.setValueAtTime(800, time);
-                metalOsc.frequency.exponentialRampToValueAtTime(200, time + 0.3);
-
-                // 쇳소리의 날카로움을 강조하기 위한 밴드패스 필터
-                const filter = audioCtx.createBiquadFilter();
-                filter.type = 'bandpass';
-                filter.frequency.setValueAtTime(1500, time);
-                filter.frequency.linearRampToValueAtTime(800, time + 0.2);
-                filter.Q.value = 5;
-
-                metalGain.gain.setValueAtTime(0, time);
-                metalGain.gain.linearRampToValueAtTime(0.6, time + 0.02); // 아주 짧고 강한 어택
-                metalGain.gain.exponentialRampToValueAtTime(0.01, time + 0.4); // 은은한 잔향
-
-                metalOsc.connect(filter);
-                filter.connect(metalGain);
-                metalGain.connect(audioCtx.destination);
-                metalOsc.start(time);
-                metalOsc.stop(time + 0.4);
-
-                // 2. 둔탁한 망치 베이스 (쿵!)
+                // 1. 묵직한 타격음 (쿵! 하는 베이스)
                 const thudOsc = audioCtx.createOscillator();
                 const thudGain = audioCtx.createGain();
                 thudOsc.type = 'sine';
-                thudOsc.frequency.setValueAtTime(150, time);
-                thudOsc.frequency.exponentialRampToValueAtTime(40, time + 0.2);
+                thudOsc.frequency.setValueAtTime(120, time);
+                thudOsc.frequency.exponentialRampToValueAtTime(30, time + 0.1); // 묵직하게 깔림
 
                 thudGain.gain.setValueAtTime(0, time);
-                thudGain.gain.linearRampToValueAtTime(0.8, time + 0.02);
-                thudGain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+                thudGain.gain.linearRampToValueAtTime(1.5, time + 0.01); // 강한 임팩트
+                thudGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
 
                 thudOsc.connect(thudGain);
                 thudGain.connect(audioCtx.destination);
                 thudOsc.start(time);
-                thudOsc.stop(time + 0.3);
+                thudOsc.stop(time + 0.2);
+
+                // 2. 쇳소리 (깡! 하는 금속음 - 주파수를 떨어뜨리지 않아 레이저 소리 방지)
+                const clangOsc1 = audioCtx.createOscillator();
+                const clangOsc2 = audioCtx.createOscillator();
+                const clangGain = audioCtx.createGain();
+
+                // 금속 특유의 챙~ 하는 불협화음 주파수 배합
+                clangOsc1.type = 'triangle';
+                clangOsc1.frequency.setValueAtTime(800, time);
+                clangOsc2.type = 'triangle';
+                clangOsc2.frequency.setValueAtTime(1250, time);
+
+                clangGain.gain.setValueAtTime(0, time);
+                clangGain.gain.linearRampToValueAtTime(0.4, time + 0.02);
+                clangGain.gain.exponentialRampToValueAtTime(0.01, time + 0.4);
+
+                clangOsc1.connect(clangGain);
+                clangOsc2.connect(clangGain);
+                clangGain.connect(audioCtx.destination);
+
+                clangOsc1.start(time);
+                clangOsc2.start(time);
+                clangOsc1.stop(time + 0.4);
+                clangOsc2.stop(time + 0.4);
+
+                // 3. 임팩트 노이즈 (망치와 쇠가 긁히는 짧은 파열음)
+                const bufferSize = audioCtx.sampleRate * 0.1;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noiseSource = audioCtx.createBufferSource();
+                noiseSource.buffer = buffer;
+                
+                const noiseFilter = audioCtx.createBiquadFilter();
+                noiseFilter.type = 'bandpass';
+                noiseFilter.frequency.setValueAtTime(2000, time);
+
+                const noiseGain = audioCtx.createGain();
+                noiseGain.gain.setValueAtTime(0, time);
+                noiseGain.gain.linearRampToValueAtTime(1, time + 0.01);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+
+                noiseSource.connect(noiseFilter);
+                noiseFilter.connect(noiseGain);
+                noiseGain.connect(audioCtx.destination);
+                noiseSource.start(time);
             }
 
-            // 3초의 대기시간 동안 점진적으로 빨라지는 망치질 스케줄링 (긴장감 고조)
-            const strikeTimes = [0, 0.8, 1.5, 2.1, 2.6];
+            // 3초 동안 서서히 빨라지는 망치질 스케줄링
+            const strikeTimes = [0, 0.8, 1.5, 2.1, 2.6, 2.9];
             strikeTimes.forEach(delay => {
                 strikeAnvil(now + delay);
             });
