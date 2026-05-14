@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>무한 검 강화</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -74,42 +74,42 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col items-center font-sans select-none overflow-hidden transition-colors duration-300">
+<body class="bg-gray-900 text-gray-100 min-h-[100dvh] flex flex-col items-center font-sans select-none overflow-y-auto overflow-x-hidden transition-colors duration-300">
 
-    <!-- 미니멀해진 상단 정보창 -->
-    <header class="w-full max-w-xl mt-6 px-8 py-4 bg-gray-800 rounded-2xl shadow-xl border border-gray-700 flex justify-between items-center z-10">
+    <!-- 미니멀해진 상단 정보창 (반응형 여백 적용) -->
+    <header class="w-full max-w-xl mt-2 sm:mt-6 px-4 sm:px-8 py-3 sm:py-4 bg-gray-800 rounded-b-2xl sm:rounded-2xl shadow-xl border-b sm:border border-gray-700 flex justify-between items-center z-10 sticky top-0 sm:static">
         <div class="flex flex-col">
-            <span class="text-gray-400 text-xs font-bold tracking-wider mb-1">클릭당 획득</span>
-            <div class="text-2xl font-bold text-gray-200"><span id="click-power">1</span> <span class="text-sm text-gray-400">원</span></div>
+            <span class="text-gray-400 text-[10px] sm:text-xs font-bold tracking-wider mb-1">클릭당 획득</span>
+            <div class="text-xl sm:text-2xl font-bold text-gray-200"><span id="click-power">1</span> <span class="text-xs sm:text-sm text-gray-400">원</span></div>
         </div>
         <div class="flex flex-col items-end">
-            <span class="text-gray-400 text-xs font-bold tracking-wider mb-1">보유 금액</span>
-            <div class="text-3xl font-black text-yellow-400 drop-shadow-md">
-                <span id="gold-display">0</span> <span class="text-xl text-yellow-500">원</span>
+            <span class="text-gray-400 text-[10px] sm:text-xs font-bold tracking-wider mb-1">보유 금액</span>
+            <div class="text-2xl sm:text-3xl font-black text-yellow-400 drop-shadow-md">
+                <span id="gold-display">0</span> <span class="text-lg sm:text-xl text-yellow-500">원</span>
             </div>
         </div>
     </header>
 
     <!-- 메인: 자랑용 거대 무기 쇼케이스 + 광석 채굴 -->
-    <main class="flex-1 flex flex-col items-center justify-center w-full relative px-4">
+    <main class="flex-1 flex flex-col items-center justify-center w-full relative px-4 py-4 sm:py-0">
         
-        <!-- [핵심] 무기 이름 및 거대 이미지 쇼케이스 영역 -->
-        <div class="w-full flex flex-col items-center justify-center mt-2 mb-10 h-80">
+        <!-- [핵심] 무기 이름 및 거대 이미지 쇼케이스 영역 (반응형 크기 조절) -->
+        <div class="w-full flex flex-col items-center justify-center mt-2 mb-4 sm:mb-10 h-56 sm:h-80">
             <!-- 무기 이름 (플래시게임 스타일: +레벨 무기이름) -->
-            <h1 id="sword-showcase-name" class="text-5xl font-black mb-8 tracking-widest drop-shadow-xl z-20">
+            <h1 id="sword-showcase-name" class="text-4xl sm:text-5xl font-black mb-4 sm:mb-8 tracking-widest drop-shadow-xl z-20">
                 +0 나무검
             </h1>
             
             <!-- 무기 이미지 (여기에 거대한 SVG가 동적으로 들어갑니다) -->
-            <div id="sword-showcase-image" class="floating-sword flex items-center justify-center transition-all duration-500 z-10 pointer-events-none">
+            <div id="sword-showcase-image" class="floating-sword flex items-center justify-center transition-all duration-500 z-10 pointer-events-none scale-75 sm:scale-100">
                 <!-- Javascript에서 SVG 삽입 -->
             </div>
         </div>
 
         <!-- 광석 버튼 (무기 밑에 살짝 작게 배치) -->
-        <button id="mine-button" class="relative group outline-none click-effect mt-4">
-            <div class="absolute inset-0 bg-blue-500 rounded-full blur-[60px] opacity-20 group-hover:opacity-40 transition duration-500"></div>
-            <svg class="relative w-32 h-32 drop-shadow-2xl text-blue-400 transition-transform duration-300 group-hover:-translate-y-1" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+        <button id="mine-button" class="relative group outline-none click-effect mt-2 sm:mt-4">
+            <div class="absolute inset-0 bg-blue-500 rounded-full blur-[40px] sm:blur-[60px] opacity-20 group-hover:opacity-40 transition duration-500"></div>
+            <svg class="relative w-24 h-24 sm:w-32 sm:h-32 drop-shadow-2xl text-blue-400 transition-transform duration-300 group-hover:-translate-y-1" viewBox="0 0 24 24" fill="currentColor" stroke="none">
                 <path d="M12 2L2 9L12 22L22 9L12 2Z" fill="url(#ore-grad)"/>
                 <path d="M12 2L2 9L12 12L22 9L12 2Z" fill="rgba(255,255,255,0.4)"/>
                 <path d="M2 9L12 22L12 12L2 9Z" fill="rgba(0,0,0,0.2)"/>
@@ -120,31 +120,31 @@
                     </linearGradient>
                 </defs>
             </svg>
-            <p class="absolute -bottom-8 w-full text-center text-gray-500 font-medium tracking-wide animate-pulse pointer-events-none">광석 캐기</p>
+            <p class="absolute -bottom-6 sm:-bottom-8 w-full text-center text-xs sm:text-sm text-gray-500 font-medium tracking-wide animate-pulse pointer-events-none">광석 캐기</p>
         </button>
     </main>
 
-    <!-- 하단 UI: 강화 패널 -->
-    <footer class="w-full max-w-xl mb-8 p-6 bg-gray-800 rounded-2xl shadow-xl border border-gray-700 flex flex-col items-center relative z-10">
+    <!-- 하단 UI: 강화 패널 (반응형 여백 및 패딩) -->
+    <footer class="w-full max-w-xl mt-auto mb-2 sm:mb-8 p-4 sm:p-6 bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-xl border-t sm:border border-gray-700 flex flex-col items-center relative z-10">
         
-        <!-- [추가] 강화 보호권 구매 및 보유량 UI -->
-        <div class="w-full flex justify-between items-center mb-4 px-4 bg-gray-900 py-3 rounded-lg border border-gray-700">
+        <!-- 강화 보호권 구매 및 보유량 UI -->
+        <div class="w-full flex justify-between items-center mb-2 sm:mb-4 px-3 sm:px-4 bg-gray-900 py-2 sm:py-3 rounded-lg border border-gray-700">
             <div class="flex items-center space-x-2">
-                <span class="text-sm text-gray-300">🛡️ 강화 보호권: <span id="scroll-count" class="text-blue-400 font-bold text-lg">0</span>개</span>
+                <span class="text-xs sm:text-sm text-gray-300">🛡️ 보호권: <span id="scroll-count" class="text-blue-400 font-bold text-base sm:text-lg">0</span>개</span>
             </div>
-            <button id="buy-scroll-button" class="text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded shadow transition disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed">구매 (10,000원)</button>
+            <button id="buy-scroll-button" class="text-[10px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white py-1.5 px-3 sm:py-2 sm:px-4 rounded shadow transition disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed">구매 (10,000원)</button>
         </div>
 
-        <button id="upgrade-button" class="w-full py-4 rounded-xl font-bold text-2xl transition-all duration-200 flex flex-col items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white shadow-lg active:scale-95 disabled:from-gray-600 disabled:to-gray-700 disabled:text-gray-400 disabled:active:scale-100 disabled:shadow-none disabled:cursor-not-allowed border-2 border-red-900 disabled:border-gray-600">
+        <button id="upgrade-button" class="w-full py-3 sm:py-4 rounded-xl font-bold text-xl sm:text-2xl transition-all duration-200 flex flex-col items-center justify-center bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white shadow-lg active:scale-95 disabled:from-gray-600 disabled:to-gray-700 disabled:text-gray-400 disabled:active:scale-100 disabled:shadow-none disabled:cursor-not-allowed border-2 border-red-900 disabled:border-gray-600">
             <span id="upgrade-text" class="tracking-widest">강화하기</span>
-            <div id="upgrade-info" class="text-base font-medium mt-1 flex space-x-6 text-red-200">
+            <div id="upgrade-info" class="text-sm sm:text-base font-medium mt-1 flex space-x-4 sm:space-x-6 text-red-200">
                 <span>비용: <span id="upgrade-cost" class="font-bold text-white">10</span>원</span>
                 <span>성공률: <span id="upgrade-prob" class="font-bold text-yellow-300">100</span>%</span>
             </div>
         </button>
-        <p id="upgrade-message" class="mt-3 text-sm font-semibold h-5 text-center"></p>
-        <!-- 데이터 초기화 버튼 (원할 때 처음부터 다시 하기 위함) -->
-        <button id="reset-button" class="mt-2 text-xs text-gray-500 hover:text-gray-300 underline decoration-gray-600 underline-offset-4">데이터 초기화</button>
+        <p id="upgrade-message" class="mt-2 sm:mt-3 text-xs sm:text-sm font-semibold h-4 sm:h-5 text-center"></p>
+        <!-- 데이터 초기화 버튼 -->
+        <button id="reset-button" class="mt-2 text-[10px] sm:text-xs text-gray-500 hover:text-gray-300 underline decoration-gray-600 underline-offset-4">데이터 초기화</button>
     </footer>
 
     <script>
@@ -255,7 +255,7 @@
         let gold = 0; 
         let isUpgrading = false; 
         let currentSwordLevel = 0; 
-        let protectionScrolls = 0; // [추가] 보유한 강화 보호권 개수
+        let protectionScrolls = 0; 
         
         // --- 검 데이터베이스 ---
         const swordDB = [
@@ -271,17 +271,17 @@
         function loadData() {
             const savedGold = localStorage.getItem('infiniteSword_gold');
             const savedLevel = localStorage.getItem('infiniteSword_level');
-            const savedScrolls = localStorage.getItem('infiniteSword_scrolls'); // [추가]
+            const savedScrolls = localStorage.getItem('infiniteSword_scrolls'); 
             
             if (savedGold !== null) gold = parseInt(savedGold, 10);
             if (savedLevel !== null) currentSwordLevel = parseInt(savedLevel, 10);
-            if (savedScrolls !== null) protectionScrolls = parseInt(savedScrolls, 10); // [추가]
+            if (savedScrolls !== null) protectionScrolls = parseInt(savedScrolls, 10); 
         }
 
         function saveData() {
             localStorage.setItem('infiniteSword_gold', gold);
             localStorage.setItem('infiniteSword_level', currentSwordLevel);
-            localStorage.setItem('infiniteSword_scrolls', protectionScrolls); // [추가]
+            localStorage.setItem('infiniteSword_scrolls', protectionScrolls); 
         }
 
         // 초기 데이터 로드
@@ -439,7 +439,6 @@
             noiseSource.start();
         }
 
-        // [추가] 보호권 발동 사운드 (방패로 튕겨내는 듯한 맑은 단단한 소리)
         function playProtectSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const t = audioCtx.currentTime;
@@ -474,9 +473,8 @@
         const upgradeCostDisplay = document.getElementById('upgrade-cost');
         const upgradeProbDisplay = document.getElementById('upgrade-prob');
         const upgradeMessage = document.getElementById('upgrade-message');
-        const resetButton = document.getElementById('reset-button'); // 초기화 버튼
+        const resetButton = document.getElementById('reset-button');
 
-        // [추가] 강화 보호권 관련 DOM
         const scrollCountDisplay = document.getElementById('scroll-count');
         const buyScrollButton = document.getElementById('buy-scroll-button');
 
@@ -486,13 +484,12 @@
             
             goldDisplay.textContent = gold.toLocaleString(); 
             clickPowerDisplay.textContent = currentSword.clickPower.toLocaleString();
-            scrollCountDisplay.textContent = protectionScrolls.toLocaleString(); // [추가] 보유 보호권 수
+            scrollCountDisplay.textContent = protectionScrolls.toLocaleString(); 
             
             showcaseName.textContent = `+${currentSwordLevel} ${currentSword.name}`;
-            showcaseName.className = `text-5xl font-black mb-8 tracking-widest drop-shadow-2xl z-20 ${currentSword.colorClass}`;
+            showcaseName.className = `text-4xl sm:text-5xl font-black mb-4 sm:mb-8 tracking-widest drop-shadow-2xl z-20 ${currentSword.colorClass}`;
             showcaseImageContainer.innerHTML = currentSword.svg;
 
-            // [추가] 보호권 구매 버튼 상태 (돈 부족 또는 강화 중일 때 비활성화)
             if (gold < 10000 || isUpgrading) {
                 buyScrollButton.disabled = true;
             } else {
@@ -579,18 +576,26 @@
             const currentSword = swordDB[currentSwordLevel];
             gold += currentSword.clickPower;
             
-            saveData(); // 데이터 저장
+            saveData(); 
             updateUI();
             
-            const clickX = e.clientX || window.innerWidth / 2;
-            const clickY = e.clientY || window.innerHeight / 2;
+            // 터치 환경에서의 정확한 좌표 측정
+            let clickX = window.innerWidth / 2;
+            let clickY = window.innerHeight / 2;
+            
+            if (e.clientX && e.clientY) {
+                clickX = e.clientX;
+                clickY = e.clientY;
+            } else if (e.touches && e.touches.length > 0) {
+                clickX = e.touches[0].clientX;
+                clickY = e.touches[0].clientY;
+            }
             
             showFloatingText(clickX, clickY, currentSword);
             createHitParticles(clickX, clickY);
             playHitSound(currentSwordLevel);
         });
 
-        // [추가] 강화 보호권 구매 버튼 이벤트
         buyScrollButton.addEventListener('click', () => {
             if (isUpgrading || gold < 10000) return;
             gold -= 10000;
@@ -608,7 +613,7 @@
             gold -= currentSword.cost;
             isUpgrading = true;
             
-            saveData(); // 돈 차감 상태 저장
+            saveData(); 
             updateUI();
             showUpgradeMessage("망치질 중... 🔨", "text-yellow-400");
             document.body.classList.add('anim-shake');
@@ -626,12 +631,11 @@
                     playSuccessSound();
                     setTimeout(() => document.body.classList.remove('effect-success'), 1000);
                 } else {
-                    // [변경] 실패 시 보호권 여부 체크
                     if (protectionScrolls > 0) {
-                        protectionScrolls--; // 보호권 1개 소모
+                        protectionScrolls--; 
                         showUpgradeMessage(`강화 실패... 💦 하지만 보호권으로 검을 지켰습니다!`, 'text-blue-400');
                         document.body.classList.add('effect-protect');
-                        playProtectSound(); // 방어 성공 사운드
+                        playProtectSound(); 
                         setTimeout(() => document.body.classList.remove('effect-protect'), 1000);
                     } else {
                         currentSwordLevel = 0;
@@ -642,7 +646,7 @@
                     }
                 }
                 
-                saveData(); // 성공 또는 실패 결과 저장
+                saveData(); 
                 isUpgrading = false;
                 updateUI();
             }, 3000);
@@ -652,17 +656,17 @@
             if(confirm("모든 데이터를 지우고 처음부터 다시 시작하시겠습니까?")) {
                 localStorage.removeItem('infiniteSword_gold');
                 localStorage.removeItem('infiniteSword_level');
-                localStorage.removeItem('infiniteSword_scrolls'); // [추가]
+                localStorage.removeItem('infiniteSword_scrolls'); 
                 gold = 0;
                 currentSwordLevel = 0;
-                protectionScrolls = 0; // [추가]
+                protectionScrolls = 0; 
                 updateUI();
             }
         });
 
         function showUpgradeMessage(msg, colorClass) {
             upgradeMessage.textContent = msg;
-            upgradeMessage.className = `mt-3 text-sm font-bold h-5 text-center ${colorClass} animate-bounce`;
+            upgradeMessage.className = `mt-2 sm:mt-3 text-xs sm:text-sm font-bold h-4 sm:h-5 text-center ${colorClass} animate-bounce`;
             setTimeout(() => upgradeMessage.classList.remove('animate-bounce'), 1000);
         }
 
