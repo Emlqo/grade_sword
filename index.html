@@ -251,6 +251,78 @@
                 </g>
             </svg>`;
 
+        const svgTitanium = `
+            <svg viewBox="-40 -40 180 180" class="w-96 h-96 drop-shadow-[0_0_40px_rgba(192,38,211,0.6)] sm:scale-110 transition-all duration-300">
+                <defs>
+                    <linearGradient id="titan-blade" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#4B5563"/><stop offset="50%" stop-color="#D946EF"/><stop offset="100%" stop-color="#1F2937"/>
+                    </linearGradient>
+                </defs>
+                <g transform="rotate(45 50 50)">
+                    <path d="M35,30 L50,-45 L65,30 L55,60 L45,60 Z" fill="url(#titan-blade)"/>
+                    <path d="M50,-45 L55,30 L52,60 L48,60 L45,30 Z" fill="#F0ABFC"/>
+                    <path d="M10,60 L90,60 L80,70 L20,70 Z" fill="#86198F"/>
+                    <rect x="42" y="70" width="16" height="35" fill="#374151"/>
+                    <circle cx="50" cy="105" r="8" fill="#D946EF"/>
+                </g>
+            </svg>`;
+
+        const svgUranium = `
+            <svg viewBox="-50 -50 200 200" class="w-96 h-96 drop-shadow-[0_0_60px_rgba(34,197,94,0.9)] animate-pulse sm:scale-125 transition-all duration-300">
+                <defs>
+                    <linearGradient id="ura-blade" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#166534"/><stop offset="50%" stop-color="#4ADE80"/><stop offset="100%" stop-color="#14532D"/>
+                    </linearGradient>
+                </defs>
+                <g transform="rotate(45 50 50)">
+                    <path d="M30,30 L50,-60 L70,30 L55,60 L45,60 Z" fill="url(#ura-blade)"/>
+                    <path d="M50,-60 L58,30 L53,60 L47,60 L42,30 Z" fill="#BBF7D0"/>
+                    <path d="M0,50 Q50,70 100,50 L80,75 L20,75 Z" fill="#15803D"/>
+                    <circle cx="50" cy="65" r="6" fill="#86EFAC"/>
+                    <rect x="40" y="75" width="20" height="40" fill="#064E3B"/>
+                    <polygon points="50,135 30,115 70,115" fill="#22C55E"/>
+                </g>
+            </svg>`;
+
+        const svgFlame = `
+            <svg viewBox="-60 -60 220 220" class="w-96 h-96 drop-shadow-[0_0_80px_rgba(239,68,68,1)] sm:scale-[1.35] transition-all duration-300">
+                <defs>
+                    <linearGradient id="flame-blade" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#B91C1C"/><stop offset="50%" stop-color="#FCA5A5"/><stop offset="100%" stop-color="#7F1D1D"/>
+                    </linearGradient>
+                </defs>
+                <g transform="rotate(45 50 50)">
+                    <path d="M35,40 Q20,0 50,-70 Q80,0 65,40 L55,60 L45,60 Z" fill="url(#flame-blade)"/>
+                    <path d="M50,-70 Q60,-20 50,20 Q40,40 50,60" stroke="#FEF08A" stroke-width="4" fill="none"/>
+                    <path d="M-10,45 Q50,85 110,45 L85,75 L15,75 Z" fill="#991B1B"/>
+                    <circle cx="50" cy="60" r="10" fill="#F59E0B"/>
+                    <rect x="38" y="75" width="24" height="45" fill="#450A0A"/>
+                    <path d="M50,140 Q30,120 50,110 Q70,120 50,140" fill="#EF4444"/>
+                </g>
+            </svg>`;
+
+        const svgIce = `
+            <svg viewBox="-70 -70 240 240" class="w-96 h-96 drop-shadow-[0_0_100px_rgba(191,219,254,0.9)] animate-pulse sm:scale-150 transition-all duration-300">
+                <defs>
+                    <linearGradient id="ice-blade" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#3B82F6"/><stop offset="50%" stop-color="#E0F2FE"/><stop offset="100%" stop-color="#1D4ED8"/>
+                    </linearGradient>
+                    <linearGradient id="ice-core" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#93C5FD"/>
+                    </linearGradient>
+                </defs>
+                <g transform="rotate(45 50 50)">
+                    <polygon points="50,-80 75,20 60,60 40,60 25,20" fill="url(#ice-blade)"/>
+                    <polygon points="50,-80 60,20 53,60 47,60 40,20" fill="url(#ice-core)"/>
+                    <polygon points="50,-80 85,-10 65,20" fill="rgba(191,219,254,0.4)"/>
+                    <polygon points="50,-80 15,-10 35,20" fill="rgba(191,219,254,0.4)"/>
+                    <polygon points="-20,50 120,50 80,80 20,80" fill="#1E3A8A"/>
+                    <polygon points="20,50 80,50 50,70" fill="#60A5FA"/>
+                    <rect x="35" y="80" width="30" height="50" fill="#172554"/>
+                    <polygon points="50,150 20,120 50,130 80,120" fill="#3B82F6"/>
+                </g>
+            </svg>`;
+
         // --- 게임 상태 데이터 ---
         let gold = 0; 
         let isUpgrading = false; 
@@ -264,14 +336,19 @@
             { name: '은검', clickPower: 20, cost: 200, prob: 60, colorClass: 'text-gray-300', particleClass: 'text-3xl text-gray-200 shadow-sm', svg: svgSilver },
             { name: '강철검', clickPower: 100, cost: 1000, prob: 40, colorClass: 'text-slate-400', particleClass: 'text-4xl text-slate-300 drop-shadow-md', svg: svgSteel },
             { name: '황금검', clickPower: 500, cost: 5000, prob: 20, colorClass: 'text-yellow-400', particleClass: 'text-5xl text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]', svg: svgGold },
-            { name: '다이아검', clickPower: 3000, cost: Infinity, prob: 0, colorClass: 'text-cyan-300', particleClass: 'text-7xl text-cyan-300 drop-shadow-[0_0_20px_rgba(103,232,249,0.9)] animate-pulse', svg: svgDiamond }
+            { name: '다이아검', clickPower: 3000, cost: 30000, prob: 10, colorClass: 'text-cyan-300', particleClass: 'text-6xl text-cyan-300 drop-shadow-[0_0_20px_rgba(103,232,249,0.9)] animate-pulse', svg: svgDiamond },
+            { name: '티타늄검', clickPower: 15000, cost: 200000, prob: 5, colorClass: 'text-fuchsia-400', particleClass: 'text-7xl text-fuchsia-400 drop-shadow-[0_0_20px_rgba(232,121,249,0.9)]', svg: svgTitanium },
+            { name: '우라늄검', clickPower: 80000, cost: 1500000, prob: 3, colorClass: 'text-green-400', particleClass: 'text-7xl text-green-400 drop-shadow-[0_0_30px_rgba(74,222,128,1)] animate-pulse', svg: svgUranium },
+            { name: '불타는검', clickPower: 500000, cost: 10000000, prob: 1, colorClass: 'text-red-500', particleClass: 'text-8xl text-red-500 drop-shadow-[0_0_40px_rgba(239,68,68,1)]', svg: svgFlame },
+            { name: '얼음검', clickPower: 3000000, cost: Infinity, prob: 0, colorClass: 'text-blue-200', particleClass: 'text-9xl text-blue-200 drop-shadow-[0_0_50px_rgba(191,219,254,1)] animate-pulse', svg: svgIce }
         ];
 
         // --- 데이터 세이브/로드 기능 (localStorage) ---
+        // 버전을 v2로 변경하여 이전 데이터를 초기화하고 새롭게 시작하도록 설정
         function loadData() {
-            const savedGold = localStorage.getItem('infiniteSword_gold');
-            const savedLevel = localStorage.getItem('infiniteSword_level');
-            const savedScrolls = localStorage.getItem('infiniteSword_scrolls'); 
+            const savedGold = localStorage.getItem('infiniteSword_v2_gold');
+            const savedLevel = localStorage.getItem('infiniteSword_v2_level');
+            const savedScrolls = localStorage.getItem('infiniteSword_v2_scrolls'); 
             
             if (savedGold !== null) gold = parseInt(savedGold, 10);
             if (savedLevel !== null) currentSwordLevel = parseInt(savedLevel, 10);
@@ -279,9 +356,9 @@
         }
 
         function saveData() {
-            localStorage.setItem('infiniteSword_gold', gold);
-            localStorage.setItem('infiniteSword_level', currentSwordLevel);
-            localStorage.setItem('infiniteSword_scrolls', protectionScrolls); 
+            localStorage.setItem('infiniteSword_v2_gold', gold);
+            localStorage.setItem('infiniteSword_v2_level', currentSwordLevel);
+            localStorage.setItem('infiniteSword_v2_scrolls', protectionScrolls); 
         }
 
         // 초기 데이터 로드
@@ -304,7 +381,8 @@
                 osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
             } else {
                 osc.type = 'sine';
-                const baseFreq = 300 + (level * 150);
+                // 레벨이 높아져도 주파수가 너무 높아져 소리가 찢어지는 것을 방지 (최대 7레벨 스케일까지만 적용)
+                const baseFreq = 300 + (Math.min(level, 7) * 150);
                 osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, audioCtx.currentTime + 0.1);
             }
@@ -490,7 +568,11 @@
             showcaseName.className = `text-4xl sm:text-5xl font-black mb-4 sm:mb-8 tracking-widest drop-shadow-2xl z-20 ${currentSword.colorClass}`;
             showcaseImageContainer.innerHTML = currentSword.svg;
 
-            if (gold < 10000 || isUpgrading) {
+            // [변경] 보호권 가격 동적 계산 (보유량에 따라 가격 2배씩 증가)
+            const scrollCost = 10000 * Math.pow(2, protectionScrolls);
+            buyScrollButton.textContent = `구매 (${scrollCost.toLocaleString()}원)`;
+
+            if (gold < scrollCost || isUpgrading) {
                 buyScrollButton.disabled = true;
             } else {
                 buyScrollButton.disabled = false;
@@ -597,8 +679,10 @@
         });
 
         buyScrollButton.addEventListener('click', () => {
-            if (isUpgrading || gold < 10000) return;
-            gold -= 10000;
+            // [변경] 클릭 시에도 동적 가격으로 계산 및 차감
+            const scrollCost = 10000 * Math.pow(2, protectionScrolls);
+            if (isUpgrading || gold < scrollCost) return;
+            gold -= scrollCost;
             protectionScrolls++;
             saveData();
             updateUI();
@@ -652,11 +736,12 @@
             }, 3000);
         });
 
+        // 저장소 키를 v2로 동일하게 맞춰 데이터 초기화 작동
         resetButton.addEventListener('click', () => {
             if(confirm("모든 데이터를 지우고 처음부터 다시 시작하시겠습니까?")) {
-                localStorage.removeItem('infiniteSword_gold');
-                localStorage.removeItem('infiniteSword_level');
-                localStorage.removeItem('infiniteSword_scrolls'); 
+                localStorage.removeItem('infiniteSword_v2_gold');
+                localStorage.removeItem('infiniteSword_v2_level');
+                localStorage.removeItem('infiniteSword_v2_scrolls'); 
                 gold = 0;
                 currentSwordLevel = 0;
                 protectionScrolls = 0; 
